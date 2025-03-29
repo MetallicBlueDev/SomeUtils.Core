@@ -48,15 +48,36 @@ public class FileHelper {
         return Collections.unmodifiableList(fileStores);
     }
 
-    public static boolean moveToPath(Path sourceFile, Path targetDirectory) {
+    public static boolean moveToPath(Path source, Path targetDirectory) {
         boolean success = false;
         int retry = 4;
 
         do {
             try {
-                Path targetWithFileName = targetDirectory.resolve(sourceFile.getFileName());
-                Files.move(sourceFile, targetWithFileName, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-                success = true;
+                Path targetWithFileName = targetDirectory.resolve(source.getFileName());
+                Files.move(source, targetWithFileName, StandardCopyOption.REPLACE_EXISTING);
+                success = Files.exists(targetWithFileName);
+            } catch (DirectoryNotEmptyException ex) {
+                retry = 0;
+                File sourceFile = source.toFile();
+
+                if (sourceFile.isDirectory()) {
+                    boolean hasError = false;
+                    Path targetWithFileName = targetDirectory.resolve(sourceFile.getName());
+
+                    for (File subFile : sourceFile.listFiles()) {
+                        if (!moveToPath(subFile.toPath(), targetWithFileName)) {
+                            hasError = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasError && sourceFile.length() == 0) {
+                        success = sourceFile.delete();
+                    }
+                } else {
+                    LoggerManager.getInstance().addError(ex);
+                }
             } catch (IOException ex) {
                 if (ex.getMessage().contains("The process cannot access the file because it is being used by another process") || ex.getMessage().contains("Le processus ne peut pas")) {
                     try {
@@ -77,7 +98,7 @@ public class FileHelper {
         } while (!success && retry > 0);
 
         if (!success) {
-            LoggerManager.getInstance().addError("Unable to move " + sourceFile.toString() + " to " + targetDirectory.toString());
+            LoggerManager.getInstance().addError("Unable to move " + source.toString() + " to " + targetDirectory.toString());
         }
         return success;
     }
