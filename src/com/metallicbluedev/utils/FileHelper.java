@@ -62,19 +62,7 @@ public class FileHelper {
                 File sourceFile = source.toFile();
 
                 if (sourceFile.isDirectory()) {
-                    boolean hasError = false;
-                    Path targetWithFileName = targetDirectory.resolve(sourceFile.getName());
-
-                    for (File subFile : sourceFile.listFiles()) {
-                        if (!moveToPath(subFile.toPath(), targetWithFileName)) {
-                            hasError = true;
-                            break;
-                        }
-                    }
-
-                    if (!hasError && sourceFile.length() == 0) {
-                        success = sourceFile.delete();
-                    }
+                    success = moveToSubPath(sourceFile, targetDirectory);
                 } else {
                     LoggerManager.getInstance().addError(ex);
                 }
@@ -547,6 +535,25 @@ public class FileHelper {
             }
         }
         return file;
+    }
+
+    private static boolean moveToSubPath(File sourceFile, Path targetDirectory) {
+        boolean success = false;
+        boolean hasError = false;
+
+        Path targetWithFileName = targetDirectory.resolve(sourceFile.getName());
+
+        for (File subFile : sourceFile.listFiles()) {
+            if (!moveToPath(subFile.toPath(), targetWithFileName)) {
+                hasError = true;
+                break;
+            }
+        }
+
+        if (!hasError && sourceFile.length() == 0) {
+            success = sourceFile.delete();
+        }
+        return success;
     }
 
     /**
