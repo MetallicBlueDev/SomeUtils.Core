@@ -91,10 +91,42 @@ public class FileHelper {
         return success;
     }
 
-    public static Set<File> listNames(String dir, boolean fileMode) {
-        return Stream.of(new File(dir).listFiles())
-            .filter(file -> (fileMode && !file.isDirectory()) || (!fileMode && file.isDirectory()))
+    /**
+     * Retourne la liste fichier ou dossier sous forme de collection ordonnée par date de modification.
+     *
+     * @param path
+     * @param fileMode
+     * @return
+     */
+    public static Set<File> listFilesAsSortedSet(String path, boolean fileMode) {
+        return listFiles(new File(path), fileMode)
+            .sorted(((o1, o2) -> Long.compare(o1.lastModified(), o2.lastModified())))
             .collect(Collectors.toSet());
+    }
+
+    /**
+     * Retourne la liste fichier ou dossier sous forme de collection ordonnée par date de modification.
+     *
+     * @param genericFile
+     * @param fileMode
+     * @return
+     */
+    public static Set<File> listFilesAsSortedSet(File genericFile, boolean fileMode) {
+        return listFiles(genericFile, fileMode)
+            .sorted(((o1, o2) -> Long.compare(o1.lastModified(), o2.lastModified())))
+            .collect(Collectors.toSet());
+    }
+
+    /**
+     * Retourne la liste fichier ou dossier sous forme de flux.
+     *
+     * @param genericFile
+     * @param fileMode
+     * @return
+     */
+    public static Stream<File> listFiles(File genericFile, boolean fileMode) {
+        return Stream.of(genericFile.listFiles())
+            .filter(file -> (fileMode && !file.isDirectory()) || (!fileMode && file.isDirectory()));
     }
 
     /**
@@ -908,11 +940,32 @@ public class FileHelper {
         return getMimeType(filePath);
     }
 
+    /**
+     * Suppression de l'ensemble d'un dossier.
+     * Cette méthode est récurisve.
+     *
+     * @param pathToBeDeleted
+     * @return
+     * @throws IOException
+     */
     public static boolean deleteDirectories(Path pathToBeDeleted) throws IOException {
         Files.walk(pathToBeDeleted)
             .sorted(Comparator.reverseOrder())
             .map(Path::toFile)
             .forEach(File::delete);
+        return Files.exists(pathToBeDeleted);
+    }
+
+    /**
+     * Suppression du fichier ou du dossier.
+     * Cette méthode n'est pas récursive.
+     *
+     * @param pathToBeDeleted
+     * @return
+     * @throws IOException
+     */
+    public static boolean deleteFile(Path pathToBeDeleted) throws IOException {
+        Files.delete(pathToBeDeleted);
         return Files.exists(pathToBeDeleted);
     }
 
