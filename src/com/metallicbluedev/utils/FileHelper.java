@@ -98,10 +98,8 @@ public class FileHelper {
      * @param fileMode
      * @return
      */
-    public static Set<File> listFilesAsSortedSet(String path, boolean fileMode) {
-        return listFiles(new File(path), fileMode)
-            .sorted(((o1, o2) -> Long.compare(o1.lastModified(), o2.lastModified())))
-            .collect(Collectors.toSet());
+    public static List<File> listFilesAsSortedSet(String path, boolean fileMode) {
+        return listFilesAsSortedSet(new File(path), fileMode);
     }
 
     /**
@@ -111,10 +109,10 @@ public class FileHelper {
      * @param fileMode
      * @return
      */
-    public static Set<File> listFilesAsSortedSet(File genericFile, boolean fileMode) {
-        return listFiles(genericFile, fileMode)
-            .sorted(((o1, o2) -> Long.compare(o1.lastModified(), o2.lastModified())))
-            .collect(Collectors.toSet());
+    public static List<File> listFilesAsSortedSet(File genericFile, boolean fileMode) {
+        List<File> list = listFiles(genericFile, fileMode).collect(Collectors.toList());
+        list.sort(Comparator.comparing(f -> f.lastModified(), Comparator.nullsFirst(Comparator.naturalOrder())));
+        return list;
     }
 
     /**
