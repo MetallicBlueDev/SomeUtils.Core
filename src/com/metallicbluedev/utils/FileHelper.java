@@ -954,7 +954,7 @@ public class FileHelper {
             .sorted(Comparator.reverseOrder())
             .map(Path::toFile)
             .forEach(File::delete);
-        return Files.exists(pathToBeDeleted);
+        return !Files.exists(pathToBeDeleted);
     }
 
     /**
