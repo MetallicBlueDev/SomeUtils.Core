@@ -94,8 +94,8 @@ public class FileHelper {
     /**
      * Retourne la liste fichier ou dossier sous forme de collection ordonnée par date de modification.
      *
-     * @param path
-     * @param fileMode
+     * @param path Chemin représenant un fichier ou un dossier.
+     * @param fileMode Détermine si il faut lister les fichiers (sinon les dossiers).
      * @return
      */
     public static List<File> listFilesAsSortedSet(String path, boolean fileMode) {
@@ -105,21 +105,24 @@ public class FileHelper {
     /**
      * Retourne la liste fichier ou dossier sous forme de collection ordonnée par date de modification.
      *
-     * @param genericFile
-     * @param fileMode
+     * @param genericFile Instance de File représenant un fichier ou un dossier.
+     * @param fileMode Détermine si il faut lister les fichiers (sinon les dossiers).
      * @return
      */
     public static List<File> listFilesAsSortedSet(File genericFile, boolean fileMode) {
         List<File> list = listFiles(genericFile, fileMode).collect(Collectors.toList());
-        list.sort(Comparator.comparing(f -> f.lastModified(), Comparator.nullsFirst(Comparator.naturalOrder())));
+
+        if (list != null) {
+            list.sort(Comparator.comparing(f -> f.lastModified(), Comparator.nullsFirst(Comparator.naturalOrder())));
+        }
         return list;
     }
 
     /**
      * Retourne la liste fichier ou dossier sous forme de flux.
      *
-     * @param genericFile
-     * @param fileMode
+     * @param genericFile Instance de File représenant un fichier ou un dossier.
+     * @param fileMode Détermine si il faut lister les fichiers (sinon les dossiers).
      * @return
      */
     public static Stream<File> listFiles(File genericFile, boolean fileMode) {
